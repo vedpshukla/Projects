@@ -1,0 +1,43 @@
+import xml.etree.ElementTree as ET
+
+CK_file = ("filePath of CK")
+HH_file = ("filePath of HH")
+Allheart_file = ("filePath of Allheart")
+
+
+def update_allheart(CK_file, HH_file, Allheart_file):
+    CK_tree = ET.parse(CK_file)
+    HH_tree = ET.parse(HH_file)
+    Allheart_tree = ET.parse(Allheart_file)
+
+    login_ids = set()
+
+    CK_root = CK_tree.getroot()
+    HH_root = HH_tree.getroot()
+    Allheart_root = Allheart_tree.getroot()
+
+    # NamespaceURL check first line of xml file .ex-<ns0:customers xmlns:ns0="http://www.demandware.com/xml/impex/customer/2006-10-31">
+    ns = {'ns': 'http://www.demandware.com/xml/impex/customer/2006-10-31'}
+
+    for customer in Allheart_root.findall("./ns:customer", ns):
+        login = customer.find("./ns:credentials/ns:login", ns).text
+        login_ids.add(login)
+
+    for customer in CK_root.findall("./ns:customer", ns):
+        login = customer.find("./ns:credentials/ns:login", ns).text
+
+        if login not in login_ids:
+            Allheart_root.append(customer)
+            login_ids.add(login)
+
+    for customer in HH_root.findall("./ns:customer", ns):
+        login = customer.find("./ns:credentials/ns:login", ns).text
+
+        if login not in login_ids:
+            Allheart_root.append(customer)
+            login_ids.add(login)
+
+    Allheart_tree.write("Allheartt31.xml")
+    print("Process Done .Say Thank You :p")
+
+update_allheart("ckfileName.xml", "hhfileName.xml", "allheartfileName.xml")
